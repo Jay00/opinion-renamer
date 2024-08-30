@@ -6,9 +6,10 @@ use walkdir::WalkDir;
 
 fn extract_decision_date(content: &Vec<String>) -> Option<NaiveDate> {
     // Look for "September 20, 2011, Argued; September 6, 2012, Decided"
-    let re = Regex::new(r"((January|February|March|April|May|June|July|August|September|October|November|December) \d{1,2}, \d{4}), Decided").unwrap();
+    let re = Regex::new(r"((January|February|March|April|May|June|July|August|September|October|November|December) \d{1,2}, \d{4}), (Decided|Filed|Rendered)").unwrap();
 
     for s in &content[0..30] {
+        println!("{s}");
         if let Some(cap) = re.captures(s) {
             let date_str = &cap[1];
 
@@ -19,6 +20,7 @@ fn extract_decision_date(content: &Vec<String>) -> Option<NaiveDate> {
             return Some(date_of_opinion);
         }
     }
+    eprintln!("No date found in opinion!");
     // No decision date found.
     None
 }
@@ -36,16 +38,15 @@ fn generate_new_file_name(file_path: &PathBuf, opinion_date: &NaiveDate) -> Path
 }
 
 fn main() {
-    let dir = "C:\\Users\\jason\\Downloads\\more cases";
+    let dir = "C:\\Users\\jason\\Downloads\\third";
 
     println!("Renaming docx files in dir {}", dir);
     let walker = WalkDir::new(dir).into_iter();
     for entry in walker.into_iter() {
         if let Ok(e) = entry {
-            println!("{}", e.path().display());
-
             // We are only looking in docx files
             if e.file_name().to_string_lossy().ends_with("docx") {
+                println!("Checking File: {}", e.path().display());
                 let file_path = PathBuf::from(e.path());
 
                 // docx::docx_replace("./name.docx", "name", "andrew").unwrap();
@@ -61,8 +62,6 @@ fn main() {
                     match res {
                         Ok(()) => {
                             println!("Renamed!");
-                            // Exit the loop. We don't need to keep looking through the remaining strings.
-                            break;
                         }
                         Err(err) => {
                             eprintln!("{err}");
