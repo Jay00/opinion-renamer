@@ -10,3 +10,6 @@ chrono = "0.4.38"
 doe = { version = "1.1.37", features = ["docx"] }
 regex = "1.10.6"
 walkdir = "2.5.0"
+clap = { version = "4.5.17", features = ["derive"] }
+dunce = "1.0.5"
+clap_derive = "4.5.13"
