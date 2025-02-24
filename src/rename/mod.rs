@@ -29,7 +29,7 @@ pub fn rename_pdf(file_path: &PathBuf) {
 
     let first_page = get_first_page_text(&document);
 
-    let opinion_date_option = extract_decision_date_from_string(first_page);
+    let opinion_date_option = extract_decision_date_from_string(&first_page);
 
     if let Some(opinion_date) = opinion_date_option {
         let new_path = generate_new_file_name(&file_path, &opinion_date);

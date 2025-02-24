@@ -15,7 +15,7 @@ pub fn watermark_case(
     let font_color: PdfColor = PdfColor::new(16, 170, 50, 255);
 
     document.pages().watermark(|group, index, width, height| {
-        let mut ds = opinion_date.format("%Y-%m-%d").to_string();
+        let mut ds = date_of_opinion.format("%Y-%m-%d").to_string();
         // The Primary Watermark
         let full_string = format!("PRIMARY");
 
