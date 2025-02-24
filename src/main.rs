@@ -42,6 +42,10 @@ fn main() {
 
     println!("Provided path: {:?}", path);
 
+    process_directory(&path);
+}
+
+fn process_directory(path: &PathBuf) {
     let case_file_directory_absolute = canonicalize(path).unwrap();
 
     // let dir = "C:\\Users\\jason\\Downloads\\third";
@@ -75,6 +79,17 @@ fn main() {
             }
         }
     }
+}
 
-    // docx::docx_remove_read_only("./name.docx").unwrap();
+#[cfg(test)]
+mod tests {
+    use crate::process_directory;
+
+    #[test]
+    fn gets_page_text() {
+        let path = std::path::Path::new("./tests");
+        process_directory(&path.to_path_buf());
+
+        assert!(true);
+    }
 }

@@ -3,8 +3,43 @@ use regex::Regex;
 
 use pdfium_render::prelude::*;
 
+pub struct Opinion {
+    pub date: NaiveDate,
+    pub caption: String,
+    pub court: String,
+    pub reporter: String,
+}
+
+impl Opinion {
+    pub fn to_date_y_m_d(&self) -> String {
+        self.date.format("%Y-%m-%d").to_string()
+    }
+
+    pub fn to_date_medium(&self) -> String {
+        self.date.format("%b. %-e, %Y").to_string()
+    }
+}
+
+pub fn extract_data_from_pdf(document: &PdfDocument) -> Option<Opinion> {
+    let first_page = get_first_page_text(document);
+    let date_option = extract_decision_date_from_string(&first_page);
+    let cc = extract_caption_and_court(&first_page);
+    let reporter = extract_reporter(&first_page);
+
+    if let Some(date) = date_option {
+        return Some(Opinion {
+            date,
+            caption: cc.0,
+            court: cc.1,
+            reporter: reporter,
+        });
+    } else {
+        return None;
+    }
+}
+
 /// Convert Single PDF's to RAW txt lines
-pub fn get_first_page_text(document: &PdfDocument) -> String {
+fn get_first_page_text(document: &PdfDocument) -> String {
     // let text = document.pages().first().unwrap().text().unwrap().all();
 
     let first_page = document.pages().first().unwrap();
@@ -16,16 +51,16 @@ pub fn get_first_page_text(document: &PdfDocument) -> String {
         .collect::<Vec<_>>()
         .join("\n");
 
-    print!("{text}");
+    // print!("{text}");
 
     return text;
 }
 
-pub fn extract_decision_date_from_string(content: &String) -> Option<NaiveDate> {
+fn extract_decision_date_from_string(content: &String) -> Option<NaiveDate> {
     // Look for "September 20, 2011, Argued; September 6, 2012, Decided"
     let re = Regex::new(r"((January|February|March|April|May|June|July|August|September|October|November|December) \d{1,2}, \d{4}), (Decided|Filed|Rendered)").unwrap();
 
-    println!("{content}");
+    // println!("{content}");
     if let Some(cap) = re.captures(&content) {
         let date_str = &cap[1];
 
@@ -34,6 +69,7 @@ pub fn extract_decision_date_from_string(content: &String) -> Option<NaiveDate> 
         let date_of_opinion = NaiveDate::parse_from_str(date_str, "%B %e, %Y").unwrap();
 
         return Some(date_of_opinion);
+    } else {
     }
 
     eprintln!("No date found in opinion!");
@@ -41,41 +77,40 @@ pub fn extract_decision_date_from_string(content: &String) -> Option<NaiveDate> 
     None
 }
 
-pub fn extract_caption_and_court(content: &String) -> Option<(String, String)> {
+fn extract_caption_and_court(content: &String) -> (String, String) {
     // Look for "September 20, 2011, Argued; September 6, 2012, Decided"
     let re = Regex::new(r"(?m)(^.+ v. .+$)\n(^.+$)").unwrap();
 
-    println!("{content}");
+    // println!("{content}");
     if let Some(cap) = re.captures(&content) {
         let caption = cap[1].to_string();
         let court = cap[2].to_string();
 
         println!("Found caption and court: {:?}, {:?}", caption, court);
 
-        return Some((caption, court));
+        return (caption, court);
+    } else {
+        // No decision date found.
+        eprintln!("No date found in opinion!");
+        return ("Not found".to_string(), "Not found".to_string());
     }
-
-    eprintln!("No date found in opinion!");
-    // No decision date found.
-    None
 }
 
-pub fn extract_reporter(content: &String) -> Option<String> {
+fn extract_reporter(content: &String) -> String {
     // Look for "September 20, 2011, Argued; September 6, 2012, Decided"
     let re = Regex::new(r"(?m)(Reporter\n)([^\*]+)").unwrap();
 
-    println!("{content}");
+    // println!("{content}");
     if let Some(cap) = re.captures(&content) {
-        let reporter_cite = cap[2].to_string();
+        let reporter_cite = cap[2].trim().to_string();
 
         println!("Found reporter citaton of opinion: {:?}", reporter_cite);
 
-        return Some(reporter_cite);
+        return reporter_cite;
+    } else {
+        eprintln!("No date found in opinion!");
+        return "Not Found".to_string();
     }
-
-    eprintln!("No date found in opinion!");
-    // No decision date found.
-    None
 }
 
 pub fn extract_decision_date_from_vec(content: &Vec<String>) -> Option<NaiveDate> {
@@ -135,6 +170,21 @@ mod tests {
 
         extract_reporter(&text);
         extract_caption_and_court(&text);
+        extract_decision_date_from_string(&text);
+
+        assert!(true);
+    }
+
+    #[test]
+    fn gets_pdf_data() {
+        let path = std::env::current_dir().unwrap();
+        println!("The current directory is {}", path.display());
+
+        let file_path = std::path::Path::new("./Curry v. United States.pdf");
+        let pdfium = Pdfium::default();
+        let document = pdfium.load_pdf_from_file(&file_path, None).unwrap();
+
+        let op = extract_data_from_pdf(&document);
 
         assert!(true);
     }

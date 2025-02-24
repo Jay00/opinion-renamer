@@ -3,9 +3,7 @@ use pdfium_render::prelude::*;
 use std::path::PathBuf;
 
 use doe::*;
-use extract::{
-    extract_decision_date_from_string, extract_decision_date_from_vec, get_first_page_text,
-};
+use extract::{extract_data_from_pdf, extract_decision_date_from_vec};
 use std::fs;
 
 mod extract;
@@ -27,20 +25,21 @@ pub fn rename_pdf(file_path: &PathBuf) {
     let pdfium = Pdfium::default();
     let document = pdfium.load_pdf_from_file(&file_path, None).unwrap();
 
-    let first_page = get_first_page_text(&document);
+    let opinion_data = extract_data_from_pdf(&document);
 
-    let opinion_date_option = extract_decision_date_from_string(&first_page);
-
-    if let Some(opinion_date) = opinion_date_option {
-        let new_path = generate_new_file_name(&file_path, &opinion_date);
+    if let Some(opinion_data) = opinion_data {
+        let new_path = generate_new_file_name(&file_path, &opinion_data.date);
 
         println!("Renaming {:?} to {:?}", &file_path, &new_path);
 
-        let res = watermark::watermark_case(document, &new_path, opinion_date);
+        let res = watermark::watermark_case(document, &new_path, opinion_data);
 
         match res {
             Ok(()) => {
-                println!("Renamed!");
+                println!("Successfully Renamed PDF: {:?}", file_path);
+
+                // Remove
+                let _ = fs::remove_file(file_path);
             }
             Err(err) => {
                 eprintln!("{err}");
