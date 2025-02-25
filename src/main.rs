@@ -1,4 +1,5 @@
 use clap::builder::styling;
+use clap::builder::OsStr;
 use clap::builder::Styles;
 use clap::Parser;
 use dunce::canonicalize;
@@ -54,17 +55,17 @@ fn process_directory(path: &PathBuf) {
     // Date Regex YYYY-MM-DD
     let re = Regex::new(r"^(\d{4})-(\d{2})-(\d{2})").unwrap();
 
+    let pdf_ext = OsStr::from("pdf");
+    let docx_ext = OsStr::from("docx");
+
     println!("Renaming docx files in dir {:?}", dir);
+
     let walker = WalkDir::new(dir).into_iter();
     for entry in walker.into_iter() {
         if let Ok(e) = entry {
             let file_name_str = e.file_name().to_string_lossy();
-            let ext = e
-                .path()
-                .extension()
-                .unwrap()
-                .to_string_lossy()
-                .to_lowercase();
+
+            let ext = e.path().extension().unwrap().to_ascii_lowercase();
 
             // Check if date string already prefix's file
             let x = re.is_match(&file_name_str);
@@ -73,13 +74,13 @@ fn process_directory(path: &PathBuf) {
                 continue;
             }
             // We are only looking in docx files
-            if file_name_str.ends_with("docx") {
+            if ext == docx_ext {
                 let file_path = PathBuf::from(e.path());
                 rename::rename_docx(&file_path);
             }
 
             // We are only looking in pdf files
-            if file_name_str.ends_with("pdf") {
+            if ext == pdf_ext {
                 let file_path = PathBuf::from(e.path());
                 rename::rename_pdf(&file_path);
             }
@@ -89,6 +90,8 @@ fn process_directory(path: &PathBuf) {
 
 #[cfg(test)]
 mod tests {
+    use clap::builder::OsStr;
+
     use crate::process_directory;
 
     #[test]
@@ -97,5 +100,20 @@ mod tests {
         process_directory(&path.to_path_buf());
 
         assert!(true);
+    }
+
+    #[test]
+    fn comparison_of_osstr() {
+        let pdf_ext = OsStr::from("pdf");
+        let docx_ext = OsStr::from("docx");
+
+        let test_ext = OsStr::from("pdf");
+        assert_eq!(pdf_ext, test_ext);
+
+        let test_ext = OsStr::from("PDF").to_ascii_lowercase();
+        assert_eq!(pdf_ext, test_ext);
+
+        let test_ext = OsStr::from("PDF").to_ascii_lowercase();
+        assert_ne!(docx_ext, test_ext);
     }
 }
