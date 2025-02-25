@@ -64,25 +64,31 @@ fn process_directory(path: &PathBuf) {
     for entry in walker.into_iter() {
         if let Ok(e) = entry {
             let file_name_str = e.file_name().to_string_lossy();
-
-            let ext = e.path().extension().unwrap().to_ascii_lowercase();
+            print!("{file_name_str}");
 
             // Check if date string already prefix's file
             let x = re.is_match(&file_name_str);
             if x {
+                print!(" Skipping . . . \n");
                 // Skip documents which already have the date
                 continue;
             }
-            // We are only looking in docx files
-            if ext == docx_ext {
-                let file_path = PathBuf::from(e.path());
-                rename::rename_docx(&file_path);
-            }
 
-            // We are only looking in pdf files
-            if ext == pdf_ext {
-                let file_path = PathBuf::from(e.path());
-                rename::rename_pdf(&file_path);
+            let ext = e.path().extension();
+
+            if let Some(ext) = ext {
+                let ext_lower = ext.to_ascii_lowercase();
+                // We are only looking in docx files
+                if ext_lower == docx_ext {
+                    let file_path = PathBuf::from(e.path());
+                    rename::rename_docx(&file_path);
+                }
+
+                // We are only looking in pdf files
+                if ext_lower == pdf_ext {
+                    let file_path = PathBuf::from(e.path());
+                    rename::rename_pdf(&file_path);
+                }
             }
         }
     }

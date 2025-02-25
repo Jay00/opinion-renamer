@@ -188,4 +188,18 @@ mod tests {
 
         assert!(true);
     }
+
+    #[test]
+    fn gets_pdf_data_cross() {
+        let path = std::env::current_dir().unwrap();
+        println!("The current directory is {}", path.display());
+
+        let file_path = std::path::Path::new("./tests/Cross v. United States_145 U.S. 571.Pdf");
+        let pdfium = Pdfium::default();
+        let document = pdfium.load_pdf_from_file(&file_path, None).unwrap();
+
+        let op = extract_data_from_pdf(&document);
+
+        assert!(true);
+    }
 }
