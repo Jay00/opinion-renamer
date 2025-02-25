@@ -59,6 +59,12 @@ fn process_directory(path: &PathBuf) {
     for entry in walker.into_iter() {
         if let Ok(e) = entry {
             let file_name_str = e.file_name().to_string_lossy();
+            let ext = e
+                .path()
+                .extension()
+                .unwrap()
+                .to_string_lossy()
+                .to_lowercase();
 
             // Check if date string already prefix's file
             let x = re.is_match(&file_name_str);
