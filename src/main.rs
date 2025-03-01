@@ -64,25 +64,25 @@ fn process_directory(path: &PathBuf) {
     for entry in walker.into_iter() {
         if let Ok(e) = entry {
             let file_name_str = e.file_name().to_string_lossy();
-
-            let ext = e.path().extension().unwrap().to_ascii_lowercase();
-
             // Check if date string already prefix's file
             let x = re.is_match(&file_name_str);
             if x {
                 // Skip documents which already have the date
                 continue;
             }
-            // We are only looking in docx files
-            if ext == docx_ext {
-                let file_path = PathBuf::from(e.path());
-                rename::rename_docx(&file_path);
-            }
 
-            // We are only looking in pdf files
-            if ext == pdf_ext {
-                let file_path = PathBuf::from(e.path());
-                rename::rename_pdf(&file_path);
+            if let Some(ext) = e.path().extension() {
+                // We are only looking in docx files
+                if ext == docx_ext {
+                    let file_path = PathBuf::from(e.path());
+                    rename::rename_docx(&file_path);
+                }
+
+                // We are only looking in pdf files
+                if ext == pdf_ext {
+                    let file_path = PathBuf::from(e.path());
+                    rename::rename_pdf(&file_path);
+                }
             }
         }
     }
@@ -96,7 +96,12 @@ mod tests {
 
     #[test]
     fn gets_page_text() {
-        let path = std::path::Path::new("./tests");
+        // let path = std::path::Path::new("./tests");
+        let path = std::path::Path::new(
+            r"C:\Users\jason\C&S Dropbox\Active\Turner_Lewkus_1994-02-20\23-CF-784\research\Which Law Applies",
+        );
+
+        assert!(path.exists());
         process_directory(&path.to_path_buf());
 
         assert!(true);
