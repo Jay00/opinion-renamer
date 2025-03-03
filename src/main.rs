@@ -102,7 +102,12 @@ mod tests {
 
     #[test]
     fn gets_page_text() {
-        let path = std::path::Path::new("./tests");
+        // let path = std::path::Path::new("./tests");
+        let path = std::path::Path::new(
+            r"C:\Users\jason\C&S Dropbox\Active\Turner_Lewkus_1994-02-20\23-CF-784\research\Which Law Applies",
+        );
+
+        assert!(path.exists());
         process_directory(&path.to_path_buf());
 
         assert!(true);
