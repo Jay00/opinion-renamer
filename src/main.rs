@@ -104,7 +104,7 @@ mod tests {
     fn gets_page_text() {
         // let path = std::path::Path::new("./tests");
         let path = std::path::Path::new(
-            r"C:\Users\jason\C&S Dropbox\Active\Turner_Lewkus_1994-02-20\23-CF-784\research\Which Law Applies",
+            r"C:\mount\C&S Dropbox\Jason Clark\Clients\ACTIVE\Bibb_Karlos_2000-09-12\2022 CF1 004981\legal research\cases",
         );
 
         assert!(path.exists());
