@@ -60,6 +60,10 @@ fn extract_decision_date_from_string(content: &String) -> Option<NaiveDate> {
     // Look for "September 20, 2011, Argued; September 6, 2012, Decided"
     let re = Regex::new(r"((January|February|March|April|May|June|July|August|September|October|November|December) \d{1,2}, \d{4}), (Decided|Filed|Rendered)").unwrap();
 
+    let re_alt = Regex::new(r"(Argued (January|February|March|April|May|June|July|August|September|October|November|December) \d{1,2}, \d{4}) ; ((January|February|March|April|May|June|July|August|September|October|November|December) \d{1,2}, \d{4})").unwrap();
+
+    let re_alt_2 = Regex::new(r"(January|February|March|April|May|June|July|August|September|October|November|December) \d{1,2}, \d{4}").unwrap();
+
     // println!("{content}");
     if let Some(cap) = re.captures(&content) {
         let date_str = &cap[1];
@@ -69,8 +73,29 @@ fn extract_decision_date_from_string(content: &String) -> Option<NaiveDate> {
         let date_of_opinion = NaiveDate::parse_from_str(date_str, "%B %e, %Y").unwrap();
 
         return Some(date_of_opinion);
-    } else {
     }
+
+    // "Argued August 24, 1959 ; December 15, 1959"
+    if let Some(cap) = re_alt.captures(&content) {
+        let date_str = &cap[3];
+
+        println!("Found date of opinion: {:?}", date_str);
+
+        let date_of_opinion = NaiveDate::parse_from_str(date_str, "%B %e, %Y").unwrap();
+
+        return Some(date_of_opinion);
+    }
+
+    // "December 15, 1959"
+    // if let Some(cap) = re_alt_2.captures(&content) {
+    //     let date_str = &cap[0];
+
+    //     println!("Found date of opinion: {:?}", date_str);
+
+    //     let date_of_opinion = NaiveDate::parse_from_str(date_str, "%B %e, %Y").unwrap();
+
+    //     return Some(date_of_opinion);
+    // }
 
     eprintln!("\n PDF. No date found in opinion!");
     // No decision date found.
@@ -117,20 +142,34 @@ pub fn extract_decision_date_from_vec(content: &Vec<String>) -> Option<NaiveDate
     // Look for "September 20, 2011, Argued; September 6, 2012, Decided"
     let re = Regex::new(r"((January|February|March|April|May|June|July|August|September|October|November|December) \d{1,2}, \d{4}), (Decided|Filed|Rendered)").unwrap();
 
-    let re_alt = Regex::new(r"((January|February|March|April|May|June|July|August|September|October|November|December) \d{1,2}, \d{4}), (Decided|Filed|Rendered)").unwrap();
+    let re_alt = Regex::new(r"(Argued (January|February|March|April|May|June|July|August|September|October|November|December) \d{1,2}, \d{4}) ; ((January|February|March|April|May|June|July|August|September|October|November|December) \d{1,2}, \d{4})").unwrap();
 
     for s in &content[0..30] {
         println!("{s}");
         if let Some(cap) = re.captures(s) {
             let date_str = &cap[1];
 
-            println!("PDF: Found date of opinion: {:?}", date_str);
+            println!("DOCX: Found date of opinion: {:?}", date_str);
 
             let date_of_opinion = NaiveDate::parse_from_str(date_str, "%B %e, %Y").unwrap();
 
             return Some(date_of_opinion);
         }
     }
+
+    for s in &content[0..30] {
+        println!("{s}");
+        if let Some(cap) = re_alt.captures(s) {
+            let date_str = &cap[3];
+
+            println!("DOCX: Found date of opinion: {:?}", date_str);
+
+            let date_of_opinion = NaiveDate::parse_from_str(date_str, "%B %e, %Y").unwrap();
+
+            return Some(date_of_opinion);
+        }
+    }
+
     eprintln!("DOCX: No date found in opinion!");
     // No decision date found.
     None
