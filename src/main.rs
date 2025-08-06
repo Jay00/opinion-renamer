@@ -31,7 +31,6 @@ A utility to rename docx court opinions by date.
 Created by Jason K. Clark", long_about = None)]
 struct Cli {
     /// Optional path to the directory containing your case file
-    #[arg(short, long, value_name = "FILE", default_value = "./")]
     path: PathBuf,
 }
 
