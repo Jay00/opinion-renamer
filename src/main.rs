@@ -24,7 +24,7 @@ fn my_styles() -> Styles {
 #[command(author = "Jason K. Clark <jasonclarklaw.com>")]
 #[command(version)]
 #[command(name = "Opinion Renamer")]
-#[command(bin_name = "renameops")]
+#[command(bin_name = "reop")]
 #[command(about = "\n\n
 ** OPINION RENAMER **
 A utility to rename docx court opinions by date.
