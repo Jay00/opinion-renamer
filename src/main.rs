@@ -30,7 +30,7 @@ fn my_styles() -> Styles {
 A utility to rename docx court opinions by date.
 Created by Jason K. Clark", long_about = None)]
 struct Cli {
-    /// Optional path to the directory containing your case file
+    /// Path to the directory containing your case file
     path: PathBuf,
 }
 
