@@ -68,7 +68,7 @@ fn extract_decision_date_from_string(content: &String) -> Option<NaiveDate> {
     if let Some(cap) = re.captures(&content) {
         let date_str = &cap[1];
 
-        println!("Found date of opinion: {:?}", date_str);
+        log::debug!("Found date of opinion: {:?}", date_str);
 
         let date_of_opinion = NaiveDate::parse_from_str(date_str, "%B %e, %Y").unwrap();
 
@@ -79,7 +79,7 @@ fn extract_decision_date_from_string(content: &String) -> Option<NaiveDate> {
     if let Some(cap) = re_alt.captures(&content) {
         let date_str = &cap[3];
 
-        println!("Found date of opinion: {:?}", date_str);
+        log::debug!("Found date of opinion: {:?}", date_str);
 
         let date_of_opinion = NaiveDate::parse_from_str(date_str, "%B %e, %Y").unwrap();
 
@@ -97,7 +97,7 @@ fn extract_decision_date_from_string(content: &String) -> Option<NaiveDate> {
     //     return Some(date_of_opinion);
     // }
 
-    eprintln!("\n PDF. No date found in opinion!");
+    log::error!("\n PDF. No date found in opinion!");
     // No decision date found.
     None
 }
@@ -111,12 +111,12 @@ fn extract_caption_and_court(content: &String) -> (String, String) {
         let caption = cap[1].to_string();
         let court = cap[2].to_string();
 
-        println!("Found caption and court: {:?}, {:?}", caption, court);
+        log::debug!("Found caption and court: {:?}, {:?}", caption, court);
 
         return (caption, court);
     } else {
         // No decision date found.
-        eprintln!("No date found in opinion!");
+        log::warn!("No date found in opinion!");
         return ("Not found".to_string(), "Not found".to_string());
     }
 }
@@ -129,11 +129,11 @@ fn extract_reporter(content: &String) -> String {
     if let Some(cap) = re.captures(&content) {
         let reporter_cite = cap[2].trim().to_string();
 
-        println!("Found reporter citaton of opinion: {:?}", reporter_cite);
+        log::debug!("Found reporter citaton of opinion: {:?}", reporter_cite);
 
         return reporter_cite;
     } else {
-        eprintln!("No reporter found in opinion!");
+        log::warn!("No reporter found in opinion!");
         return "Not Found".to_string();
     }
 }
@@ -145,11 +145,11 @@ pub fn extract_decision_date_from_vec(content: &Vec<String>) -> Option<NaiveDate
     let re_alt = Regex::new(r"(Argued (January|February|March|April|May|June|July|August|September|October|November|December) \d{1,2}, \d{4}) ; ((January|February|March|April|May|June|July|August|September|October|November|December) \d{1,2}, \d{4})").unwrap();
 
     for s in &content[0..30] {
-        println!("{s}");
+        log::debug!("{s}");
         if let Some(cap) = re.captures(s) {
             let date_str = &cap[1];
 
-            println!("DOCX: Found date of opinion: {:?}", date_str);
+            log::debug!("DOCX: Found date of opinion: {:?}", date_str);
 
             let date_of_opinion = NaiveDate::parse_from_str(date_str, "%B %e, %Y").unwrap();
 
@@ -158,11 +158,11 @@ pub fn extract_decision_date_from_vec(content: &Vec<String>) -> Option<NaiveDate
     }
 
     for s in &content[0..30] {
-        println!("{s}");
+        log::debug!("{s}");
         if let Some(cap) = re_alt.captures(s) {
             let date_str = &cap[3];
 
-            println!("DOCX: Found date of opinion: {:?}", date_str);
+            log::debug!("DOCX: Found date of opinion: {:?}", date_str);
 
             let date_of_opinion = NaiveDate::parse_from_str(date_str, "%B %e, %Y").unwrap();
 
@@ -170,7 +170,7 @@ pub fn extract_decision_date_from_vec(content: &Vec<String>) -> Option<NaiveDate
         }
     }
 
-    eprintln!("DOCX: No date found in opinion!");
+    log::warn!("DOCX: No date found in opinion!");
     // No decision date found.
     None
 }
@@ -187,13 +187,7 @@ mod tests {
         let path = std::env::current_dir().unwrap();
         println!("The current directory is {}", path.display());
 
-        let pdfium = Pdfium::default();
-        // BIND to PDFIUM
-        // let pdfium = Pdfium::new(
-        //     Pdfium::bind_to_library(Pdfium::pdfium_platform_library_name_at_path("./"))
-        //         .or_else(|_| Pdfium::bind_to_system_library())
-        //         .expect("Failed to Bind to pdfium"),
-        // );
+        let _pdfium = Pdfium::default();
 
         assert!(true);
     }
