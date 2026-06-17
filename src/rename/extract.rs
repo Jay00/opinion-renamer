@@ -103,8 +103,13 @@ fn extract_decision_date_from_string(content: &String) -> Option<NaiveDate> {
 }
 
 fn extract_caption_and_court(content: &String) -> (String, String) {
-    // Look for "September 20, 2011, Argued; September 6, 2012, Decided"
+    // Look for e.g., "Curry v. United States"
+    // Next line is usually court name
     let re = Regex::new(r"(?m)(^.+ v. .+$)\n(^.+$)").unwrap();
+
+    // Also need to look for "In re "
+    // Second Line will be court name
+    let re_in_re_cases = Regex::new(r"(?m)(^In re .+$)\n(^.+$)").unwrap();
 
     // println!("{content}");
     if let Some(cap) = re.captures(&content) {
@@ -114,9 +119,16 @@ fn extract_caption_and_court(content: &String) -> (String, String) {
         println!("Found caption and court: {:?}, {:?}", caption, court);
 
         return (caption, court);
+    } else if let Some(cap) = re_in_re_cases.captures(&content) {
+        let caption = cap[1].to_string();
+        let court = cap[2].to_string();
+
+        println!("Found caption and court: {:?}, {:?}", caption, court);
+
+        return (caption, court);
     } else {
         // No decision date found.
-        eprintln!("No date found in opinion!");
+        eprintln!("No Case Name / Caption found in opinion!");
         return ("Not found".to_string(), "Not found".to_string());
     }
 }
@@ -203,17 +215,38 @@ mod tests {
         let path = std::env::current_dir().unwrap();
         println!("The current directory is {}", path.display());
 
-        let file_path = std::path::Path::new("./Curry v. United States.pdf");
         let pdfium = Pdfium::default();
+
+        let file_path = std::path::Path::new("./tests/Curry v. United States.pdf");
         let document = pdfium.load_pdf_from_file(&file_path, None).unwrap();
 
         let text = get_first_page_text(&document);
 
-        extract_reporter(&text);
-        extract_caption_and_court(&text);
-        extract_decision_date_from_string(&text);
+        let reporter = extract_reporter(&text);
+        assert_eq!(reporter, "520 A.2d 255");
 
-        assert!(true);
+        let (caption, court) = extract_caption_and_court(&text);
+        assert_eq!(caption, "Curry v. United States");
+        assert_eq!(court, "District of Columbia Court of Appeals");
+
+        let date = extract_decision_date_from_string(&text);
+        assert_eq!(date, Some(NaiveDate::from_ymd_opt(1987, 1, 14).unwrap()));
+
+        let file_path =
+            std::path::Path::new("./tests/In re Prosecution of Crawley_978 A.2d 608.pdf");
+        let document = pdfium.load_pdf_from_file(&file_path, None).unwrap();
+
+        let text = get_first_page_text(&document);
+
+        let reporter = extract_reporter(&text);
+        assert_eq!(reporter, "978 A.2d 608");
+
+        let (caption, court) = extract_caption_and_court(&text);
+        assert_eq!(caption, "In re Prosecution of Crawley");
+        assert_eq!(court, "District of Columbia Court of Appeals");
+
+        let date = extract_decision_date_from_string(&text);
+        assert_eq!(date, Some(NaiveDate::from_ymd_opt(2009, 8, 20).unwrap()));
     }
 
     #[test]
@@ -221,13 +254,24 @@ mod tests {
         let path = std::env::current_dir().unwrap();
         println!("The current directory is {}", path.display());
 
-        let file_path = std::path::Path::new("./Curry v. United States.pdf");
+        let file_path =
+            std::path::Path::new("./tests/In re Prosecution of Crawley_978 A.2d 608.pdf");
         let pdfium = Pdfium::default();
         let document = pdfium.load_pdf_from_file(&file_path, None).unwrap();
 
-        let op = extract_data_from_pdf(&document);
+        let op = extract_data_from_pdf(&document).unwrap();
 
-        assert!(true);
+        let expected_opinion = Opinion {
+            date: NaiveDate::from_ymd_opt(2009, 8, 20).unwrap(),
+            caption: "In re Prosecution of Crawley".to_string(),
+            court: "District of Columbia Court of Appeals".to_string(),
+            reporter: "978 A.2d 608".to_string(),
+        };
+
+        assert_eq!(op.date, expected_opinion.date);
+        assert_eq!(op.caption, expected_opinion.caption);
+        assert_eq!(op.court, expected_opinion.court);
+        assert_eq!(op.reporter, expected_opinion.reporter);
     }
 
     #[test]

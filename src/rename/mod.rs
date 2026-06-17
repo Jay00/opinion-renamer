@@ -69,3 +69,38 @@ pub fn rename_docx(file_path: &PathBuf) {
         } // Rename a.txt to b.txt
     }
 }
+
+#[cfg(test)]
+mod tests {
+
+    use super::*;
+
+    // use std::path::Path;
+    // use std::path::Pathbuf;
+    #[test]
+    fn pfium_binds_to_binary() {
+        let path = std::env::current_dir().unwrap();
+        println!("The current directory is {}", path.display());
+
+        let pdfium = Pdfium::default();
+        // BIND to PDFIUM
+        // let pdfium = Pdfium::new(
+        //     Pdfium::bind_to_library(Pdfium::pdfium_platform_library_name_at_path("./"))
+        //         .or_else(|_| Pdfium::bind_to_system_library())
+        //         .expect("Failed to Bind to pdfium"),
+        // );
+
+        assert!(true);
+    }
+
+    #[test]
+    fn test_renames_pdf() {
+        let path = std::env::current_dir().unwrap();
+        println!("The current directory is {}", path.display());
+
+        let file_path =
+            std::path::Path::new("./tests/In re Prosecution of Crawley_978 A.2d 608.pdf");
+
+        let res = rename_pdf(&file_path.to_path_buf());
+    }
+}
