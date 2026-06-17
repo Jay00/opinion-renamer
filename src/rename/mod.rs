@@ -30,19 +30,19 @@ pub fn rename_pdf(file_path: &PathBuf) {
     if let Some(opinion_data) = opinion_data {
         let new_path = generate_new_file_name(&file_path, &opinion_data.date);
 
-        println!("Renaming {:?} to {:?}", &file_path, &new_path);
+        log::debug!("Renaming {:?} to {:?}", &file_path, &new_path);
 
         let res = watermark::watermark_case(document, &new_path, opinion_data);
 
         match res {
             Ok(()) => {
-                println!("Successfully Renamed PDF: {:?}", file_path);
+                log::info!("Successfully Renamed PDF: {:?}", file_path);
 
                 // Remove
                 let _ = fs::remove_file(file_path);
             }
             Err(err) => {
-                eprintln!("{err}");
+                log::error!("{err}");
             }
         } // Rename a.txt to b.txt
     }
@@ -57,14 +57,14 @@ pub fn rename_docx(file_path: &PathBuf) {
     if let Some(opinion_date) = opinion_date_option {
         let new_path = generate_new_file_name(&file_path, &opinion_date);
 
-        println!("Renaming {:?} to {:?}", &file_path, &new_path);
+        log::info!("Renaming {:?} to {:?}", &file_path, &new_path);
         let res = fs::rename(&file_path, &new_path);
         match res {
             Ok(()) => {
-                println!("Renamed!");
+                log::debug!("Renamed!");
             }
             Err(err) => {
-                eprintln!("{err}");
+                log::error!("{err}");
             }
         } // Rename a.txt to b.txt
     }
