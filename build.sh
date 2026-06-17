@@ -7,7 +7,7 @@ cargo build --release
 # cp ".\pdfium.dll" "C:\jkctools\opinion-renamer\pdfium.dll"
 
 
-DEST_DIRECTORY1="C:\Users\jason\C&S Dropbox\jkctools\tscript"
+DEST_DIRECTORY1="C:\Users\jason\OneDrive\Apps\opinion-renamer"
 # DIRECTORY2="C:\mount\C&S Dropbox\jkctools\tscript"
 
 if [ -d "$DEST_DIRECTORY1" ]; then
