@@ -10,6 +10,11 @@ cargo build --release
 DEST_DIRECTORY1="C:\Users\jason\OneDrive\Apps\opinion-renamer"
 # DIRECTORY2="C:\mount\C&S Dropbox\jkctools\tscript"
 
+# Create the Destination Directory if it doesn't exist
+if [ ! -d "$DEST_DIRECTORY1" ]; then
+  mkdir -p "$DEST_DIRECTORY1"
+fi
+
 if [ -d "$DEST_DIRECTORY1" ]; then
   echo "$DEST_DIRECTORY1 does exist."
   echo "Moving new executables to Dropbox jkctools ..."
